@@ -43,7 +43,7 @@ public class CommandHandler {
         } else description = args[1];
         Task task = taskManager.createTask(description);
         taskManager.addTask(task);
-        System.out.println("Task added successfully: " + task);
+        System.out.println("Task added successfully: " + task.getId());
     }
 
     private void handleList() throws IOException {
@@ -51,10 +51,50 @@ public class CommandHandler {
     }
 
     private void handleUpdate(String[] args) {
-        // Додайте реалізацію для оновлення завдання
+        int taskId = getTaskId(args);
+        if (taskId == -1) return;
+
+        String newDescription = getTaskDescription(args);
+        if (newDescription == null) return;
+
+        try {
+            boolean updated = taskManager.updateTask(taskId, newDescription);
+            System.out.println(updated ? "Task updated successfully." : "Task with ID " + taskId + " not found.");
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred: " + e.getMessage());
+        }
     }
 
     private void handleDelete(String[] args) {
         // Додайте реалізацію для видалення завдання
+    }
+
+    private String getTaskDescription(String[] args) {
+        if (args.length == 3) {
+            return args[2];
+        }
+        System.out.print("Enter new description: ");
+        return scanner.nextLine().trim();
+    }
+
+    private int getTaskId(String[] args) {
+        if (args.length >= 2) {
+            try {
+                return Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid task ID. Please provide a numeric ID.");
+                return -1;
+            }
+        }
+
+        while (true) {
+            System.out.print("Enter task ID: ");
+            String input = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid ID. Please enter a numeric ID.");
+            }
+        }
     }
 }

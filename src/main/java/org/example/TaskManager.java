@@ -6,10 +6,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TaskManager {
     private static final String FILE_NAME = "tasks.json";
@@ -56,6 +53,19 @@ public class TaskManager {
                 System.out.println(task);
             }
         }
+    }
+
+    public boolean updateTask(int id, String description) throws IOException {
+        List<Map<String, Object>> tasks = readTasks();
+        for (Map<String, Object> task : tasks) {
+            if (Integer.parseInt(task.get("id").toString()) == id) {
+                task.put("description", description);
+                task.put("updatedAt", LocalDateTime.now().toString());
+                break;
+            }else return false;
+        }
+        writeTasks(tasks);
+        return true;
     }
 
     private void writeTasks(List<Map<String, Object>> tasks) throws IOException {
