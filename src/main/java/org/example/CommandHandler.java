@@ -52,8 +52,6 @@ public class CommandHandler {
 
     private void handleUpdate(String[] args) {
         int taskId = getTaskId(args);
-        if (taskId == -1) return;
-
         String newDescription = getTaskDescription(args);
         if (newDescription == null) return;
 
@@ -66,7 +64,13 @@ public class CommandHandler {
     }
 
     private void handleDelete(String[] args) {
-        // Додайте реалізацію для видалення завдання
+        int taskId = getTaskId(args);
+        try {
+            boolean deleted = taskManager.deleteTask(taskId);
+            System.out.println(deleted ? "Task deleted successfully." : "Task with ID " + taskId + " not found.");
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred: " + e.getMessage());
+        }
     }
 
     private String getTaskDescription(String[] args) {

@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TaskManager {
     private static final String FILE_NAME = "tasks.json";
@@ -57,28 +58,55 @@ public class TaskManager {
 
     public boolean updateTask(int id, String description) throws IOException {
         List<Map<String, Object>> tasks = readTasks();
+        boolean isUpdated = false;
         for (Map<String, Object> task : tasks) {
             if (Integer.parseInt(task.get("id").toString()) == id) {
                 task.put("description", description);
                 task.put("updatedAt", LocalDateTime.now().toString());
+                isUpdated = true;
                 break;
-            }else return false;
+            }
         }
-        writeTasks(tasks);
+        if(isUpdated) {
+            writeTasks(tasks);
+        }
         return true;
     }
 
-    private void writeTasks(List<Map<String, Object>> tasks) throws IOException {
-        FileWriter writer = new FileWriter(FILE_NAME);
-        writer.write("[\n");
-        for (int i = 0; i < tasks.size(); i++) {
-            writer.write(mapToJson(tasks.get(i)));
-            if (i < tasks.size() - 1) {
-                writer.write(",\n");
+    public boolean deleteTask (Integer id) throws IOException {
+        List<Map<String, Object>> tasks = readTasks();
+        boolean isDeleted = false;
+        for (Map<String, Object> task : tasks) {
+            if (Integer.parseInt(task.get("id").toString()) == id) {
+                task.clear();
+                isDeleted = true;
+                break;
             }
         }
-        writer.write("\n]");
-        writer.close();
+        if (isDeleted) {
+            writeTasks(tasks);
+        }
+        return isDeleted;
+    }
+
+    private void writeTasks(List<Map<String, Object>> tasks) throws IOException {
+        try (FileWriter writer = new FileWriter(FILE_NAME)) {
+            // filter empty maps
+            List<Map<String, Object>> nonEmptyTasks = tasks.stream()
+                    .filter(task -> !task.isEmpty())  //skip empty
+                    .collect(Collectors.toList());
+
+            if (nonEmptyTasks.isEmpty()) {
+                writer.write("[]");
+            } else {
+                writer.write("[\n");
+                String jsonContent = nonEmptyTasks.stream()
+                        .map(this::mapToJson)
+                        .collect(Collectors.joining(",\n"));
+                writer.write(jsonContent);
+                writer.write("\n]");
+            }
+        }
     }
 
     private Map<String, Object> parseJsonToMap(String json) {
@@ -99,7 +127,9 @@ public class TaskManager {
             json.append("\"").append(entry.getKey()).append("\":");
             json.append("\"").append(entry.getValue()).append("\",");
         }
-        json.deleteCharAt(json.length() - 1);
+        if (json.length() > 1) {
+            json.deleteCharAt(json.length() - 1); // Видалення останньої коми
+        }
         json.append("}");
         return json.toString();
     }
