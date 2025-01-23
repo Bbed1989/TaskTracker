@@ -51,7 +51,7 @@ public class TaskManager {
         List<Map<String, Object>> tasks = readTasks();
         for(Map<String, Object> task : tasks){
             if(TaskStatus.valueOf(task.get("status").toString()) == taskStatus) {
-                System.out.println(task);
+                System.out.println(task.get("description").toString());
             }
         }
     }
@@ -87,6 +87,23 @@ public class TaskManager {
             writeTasks(tasks);
         }
         return isDeleted;
+    }
+
+    public boolean changeStatus(TaskStatus taskStatus, int id) throws IOException {
+        List<Map<String, Object>> tasks = readTasks();
+        boolean statusChanged = false;
+        for (Map<String, Object> task : tasks) {
+            if (Integer.parseInt(task.get("id").toString()) == id) {
+                task.put("status", taskStatus);
+                task.put("updatedAt", LocalDateTime.now().toString());
+                statusChanged = true;
+                break;
+            }
+        }
+        if (statusChanged) {
+            writeTasks(tasks);
+        }
+        return statusChanged;
     }
 
     private void writeTasks(List<Map<String, Object>> tasks) throws IOException {
