@@ -70,7 +70,7 @@ public class TaskManager {
         if(isUpdated) {
             writeTasks(tasks);
         }
-        return true;
+        return isUpdated;
     }
 
     public boolean deleteTask (Integer id) throws IOException {
@@ -111,7 +111,7 @@ public class TaskManager {
             // filter empty maps
             List<Map<String, Object>> nonEmptyTasks = tasks.stream()
                     .filter(task -> !task.isEmpty())  //skip empty
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (nonEmptyTasks.isEmpty()) {
                 writer.write("[]");

@@ -3,10 +3,10 @@ package org.example;
 import java.time.LocalDateTime;
 
 public class Task {
-    private int id;
+    private final int id;
     private String description;
     private TaskStatus status;
-    private LocalDateTime createdAt;
+    private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Task(int id, String description, TaskStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -25,16 +25,9 @@ public class Task {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public TaskStatus getStatus() {
         return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -43,10 +36,6 @@ public class Task {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class CommandHandler {
     private final TaskManager taskManager = new TaskManager();
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
 
     public void handleCommand(String[] args) throws IOException {
