@@ -1,11 +1,12 @@
 package org.example;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class CommandHandler {
     private final TaskManager taskManager = new TaskManager();
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
 
     public void handleCommand(String[] args) throws IOException {
@@ -15,20 +16,23 @@ public class CommandHandler {
             args = input.split("\\s+", 2);
         }
 
-        String command = args[0]; // first word is a command}
+        String command = args[0]; // first word is a command
 
         switch (command) {
             case "add":
                 handleAdd(args);
                 break;
             case "list":
-                handleList();
+                handleList(args);
                 break;
             case "update":
                 handleUpdate(args);
                 break;
             case "delete":
                 handleDelete(args);
+                break;
+            case "mark-in-progress", "mark-done":
+                handleStatus(args);
                 break;
             default:
                 System.out.println("Unknown command: " + command);
@@ -46,7 +50,11 @@ public class CommandHandler {
         System.out.println("Task added successfully: " + task.getId());
     }
 
-    private void handleList() throws IOException {
+    private void handleList(String[] args) throws IOException {
+        if (args.length > 1){
+            taskManager.listTasksByStatus(getTaskStatus(args));
+            return;
+        }
         taskManager.listTasks();
     }
 
@@ -73,12 +81,39 @@ public class CommandHandler {
         }
     }
 
+    private void handleStatus(String[] args) {
+        int taskId = getTaskId(args);
+        TaskStatus taskStatus = getTaskStatus(args);
+        try {
+            boolean deleted = taskManager.changeStatus(taskStatus, taskId);
+            System.out.println(deleted ? "Status changed successfully." : "Task with ID " + taskId + " not found.");
+        } catch (Exception e) {
+            System.out.println("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
     private String getTaskDescription(String[] args) {
         if (args.length == 3) {
             return args[2];
         }
         System.out.print("Enter new description: ");
         return scanner.nextLine().trim();
+    }
+
+    private TaskStatus getTaskStatus (String[] args) {
+        if (Objects.equals(args[0], "list")) {
+            return switch (args[1]) {
+                case "in-progress" -> TaskStatus.IN_PROGRESS;
+                case "done" -> TaskStatus.DONE;
+                case "todo" -> TaskStatus.TODO;
+                default -> throw new IllegalArgumentException("Unknown command: " + args[1]);
+            };
+        }
+        return switch (args[0]) {
+            case "mark-in-progress" -> TaskStatus.IN_PROGRESS;
+            case "mark-done" -> TaskStatus.DONE;
+            default -> throw new IllegalArgumentException("Unknown command: " + args[0]);
+        };
     }
 
     private int getTaskId(String[] args) {
